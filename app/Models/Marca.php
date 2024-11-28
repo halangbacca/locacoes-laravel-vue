@@ -28,4 +28,8 @@ class Marca extends Model
             'nome.min' => 'O nome deve ter pelo menos 3 caracteres.'
         ];
     }
+
+    public function modelos(){
+        return $this->hasMany(Modelo::class);
+    }
 }

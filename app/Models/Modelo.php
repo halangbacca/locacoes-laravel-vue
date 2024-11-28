@@ -31,4 +31,8 @@ class Modelo extends Model
             'mimes' => 'O arquivo de imagem deve ser do tipo png, jpg ou jpeg.'
         ];
     }
+
+    public function marca(){
+        return $this->belongsTo(Marca::class);
+    }
 }
