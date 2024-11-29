@@ -19,9 +19,17 @@ class ModeloController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->modelo::all());
+        $modelos = array();
+
+        if ($request->has('atributos')) {
+            $atributos = $request->input('atributos');
+            $modelos = $this->modelo->selectRaw($atributos)->with('marca')->get();
+        } else {
+            $modelos = $this->modelo->with('marca')->get();
+        }
+        return response()->json($modelos, 200);
     }
 
     /**
@@ -101,15 +109,9 @@ class ModeloController extends Controller
         $imagem = $request->file('imagem');
         $imagem_urn = $imagem->store('marcas', 'public');
 
-        $modelo->update([
-            'marca_id' => $request->input('marca_id'),
-            'nome' => $request->input('nome'),
-            'imagem' => $imagem_urn,
-            'numero_portas' => $request->input('numero_portas'),
-            'lugares' => $request->input('lugares'),
-            'air_bag' => $request->input('air_bag'),
-            'abs' => $request->input('abs'),
-        ]);
+        $modelo->fill($request->all());
+        $modelo->imagem = $imagem_urn;
+        $modelo->save();
 
         return response()->json($modelo, 200);
     }

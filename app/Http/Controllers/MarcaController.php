@@ -21,7 +21,7 @@ class MarcaController extends Controller
      */
     public function index()
     {
-        return response()->json($this->marca::all());
+        return response()->json($this->marca->with('modelos')->get(), 200);
     }
 
     /**
@@ -96,10 +96,9 @@ class MarcaController extends Controller
         $imagem = $request->file('imagem');
         $imagem_urn = $imagem->store('marcas', 'public');
 
-        $marca->update([
-            'nome' => $request->input('nome'),
-            'imagem' => $imagem_urn
-        ]);
+        $marca->fill($request->all());
+        $marca->imagem = $imagem_urn;
+        $marca->save();
 
         return response()->json($marca, 200);
     }
