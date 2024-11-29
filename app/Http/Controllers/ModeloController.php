@@ -23,12 +23,29 @@ class ModeloController extends Controller
     {
         $modelos = array();
 
+        if ($request->has('atributos_marca')) {
+            $atributos_marca = $request->input("atributos_marca");
+            $modelos = $this->modelo->with('marca:id,' . $atributos_marca);
+        } else {
+            $modelos = $this->modelo->with('marca');
+        }
+
+        if ($request->has('filtro')) {
+            $filtros = explode(';', $request->input("filtro"));
+
+            foreach ($filtros as $key => $condicao) {
+                $c = explode(':', $condicao);
+                $modelos = $modelos->where($c[0], $c[1], $c[2]);
+            }
+        }
+
         if ($request->has('atributos')) {
             $atributos = $request->input('atributos');
-            $modelos = $this->modelo->selectRaw($atributos)->with('marca')->get();
+            $modelos = $modelos->selectRaw($atributos)->get();
         } else {
-            $modelos = $this->modelo->with('marca')->get();
+            $modelos = $modelos->get();
         }
+
         return response()->json($modelos, 200);
     }
 
@@ -38,7 +55,8 @@ class ModeloController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public
+    function store(Request $request)
     {
         $request->validate($this->modelo->rules(), $this->modelo->feedback());
 
@@ -63,7 +81,8 @@ class ModeloController extends Controller
      * @param \App\Models\Modelo $modelo
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public
+    function show($id)
     {
         $modelo = $this->modelo->with('marca')->find($id);
 
@@ -81,7 +100,8 @@ class ModeloController extends Controller
      * @param \App\Models\Modelo $modelo
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public
+    function update(Request $request, $id)
     {
         $modelo = $this->modelo->find($id);
 
@@ -122,7 +142,8 @@ class ModeloController extends Controller
      * @param \App\Models\Modelo $modelo
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public
+    function destroy($id)
     {
         $modelo = $this->modelo->find($id);
 
