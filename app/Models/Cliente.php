@@ -17,4 +17,9 @@ class Cliente extends Model
             'nome' => 'required',
         ];
     }
+
+    public function locacoes()
+    {
+        return $this->hasMany(Locacao::class);
+    }
 }
