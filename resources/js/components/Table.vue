@@ -13,7 +13,7 @@
                     <img :src="'/storage/' + valor" width="30" height="30" alt="Imagem da marca">
                 </span>
                 <span v-if="titulos[chaveValor].tipo === 'text'">{{ valor }}</span>
-                <span v-if="titulos[chaveValor].tipo === 'data'">{{ valor }}</span>
+                <span v-if="titulos[chaveValor].tipo === 'data'">{{ valor | formataDataTempoGlobal }}</span>
             </td>
             <td v-if="visualizar.visivel || atualizar.visivel || remover.visivel">
                 <button v-if="visualizar.visivel" class="btn btn-outline-primary btn-sm"

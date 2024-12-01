@@ -50,6 +50,22 @@ Vue.component('pagination-component', require('./components/Pagination.vue').def
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.filter('formataDataTempoGlobal', function (d) {
+    if (!d) return '';
+
+    const [data, tempo] = d.split('T'); // Divide a string na data e hora
+
+    // Formatar a data (YYYY-MM-DD para DD/MM/YYYY)
+    const [ano, mes, dia] = data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+
+    // Formatar a hora (hh:mm:ss, removendo milissegundos, se presentes)
+    const hora = tempo.split('.')[0]; // Remove milissegundos, se houver
+
+    // Retorna o formato final
+    return `${dataFormatada} ${hora}`;
+});
+
 const app = new Vue({
     el: '#app',
     store,

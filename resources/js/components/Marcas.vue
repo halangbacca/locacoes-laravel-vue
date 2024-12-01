@@ -41,7 +41,7 @@
                                 id: {titulo: 'ID', tipo: 'text'},
                                 nome: {titulo: 'Nome', tipo: 'text'},
                                 imagem: {titulo: 'Imagem', tipo: 'imagem'},
-                                created_at: {titulo: 'Data de criação', tipo: 'data'},
+                                created_at: {titulo: 'Data e hora de criação', tipo: 'data'},
                             }"></table-component>
                     </template>
                     <template v-slot:rodape>

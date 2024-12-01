@@ -5877,7 +5877,7 @@ var render = function render() {
                 tipo: "imagem"
               },
               created_at: {
-                titulo: "Data de criação",
+                titulo: "Data e hora de criação",
                 tipo: "data"
               }
             }
@@ -6417,7 +6417,7 @@ var render = function render() {
           height: "30",
           alt: "Imagem da marca"
         }
-      })]) : _vm._e(), _vm._v(" "), _vm.titulos[chaveValor].tipo === "text" ? _c("span", [_vm._v(_vm._s(valor))]) : _vm._e(), _vm._v(" "), _vm.titulos[chaveValor].tipo === "data" ? _c("span", [_vm._v(_vm._s(valor))]) : _vm._e()]);
+      })]) : _vm._e(), _vm._v(" "), _vm.titulos[chaveValor].tipo === "text" ? _c("span", [_vm._v(_vm._s(valor))]) : _vm._e(), _vm._v(" "), _vm.titulos[chaveValor].tipo === "data" ? _c("span", [_vm._v(_vm._s(_vm._f("formataDataTempoGlobal")(valor)))]) : _vm._e()]);
     }), _vm._v(" "), _vm.visualizar.visivel || _vm.atualizar.visivel || _vm.remover.visivel ? _c("td", [_vm.visualizar.visivel ? _c("button", {
       staticClass: "btn btn-outline-primary btn-sm",
       attrs: {
@@ -6469,6 +6469,12 @@ render._withStripped = true;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -6518,6 +6524,27 @@ Vue.component('pagination-component', (__webpack_require__(/*! ./components/Pagi
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.filter('formataDataTempoGlobal', function (d) {
+  if (!d) return '';
+  var _d$split = d.split('T'),
+    _d$split2 = _slicedToArray(_d$split, 2),
+    data = _d$split2[0],
+    tempo = _d$split2[1]; // Divide a string na data e hora
+
+  // Formatar a data (YYYY-MM-DD para DD/MM/YYYY)
+  var _data$split = data.split('-'),
+    _data$split2 = _slicedToArray(_data$split, 3),
+    ano = _data$split2[0],
+    mes = _data$split2[1],
+    dia = _data$split2[2];
+  var dataFormatada = "".concat(dia, "/").concat(mes, "/").concat(ano);
+
+  // Formatar a hora (hh:mm:ss, removendo milissegundos, se presentes)
+  var hora = tempo.split('.')[0]; // Remove milissegundos, se houver
+
+  // Retorna o formato final
+  return "".concat(dataFormatada, " ").concat(hora);
+});
 var app = new Vue({
   el: '#app',
   store: store
