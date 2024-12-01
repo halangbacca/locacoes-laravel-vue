@@ -5206,11 +5206,6 @@ __webpack_require__.r(__webpack_exports__);
       }
     };
   },
-  computed: {
-    token: function token() {
-      return localStorage.getItem('token');
-    }
-  },
   methods: {
     paginacao: function paginacao(link) {
       if (link.url) {
@@ -5224,13 +5219,7 @@ __webpack_require__.r(__webpack_exports__);
     carregarLista: function carregarLista() {
       var _this = this;
       var url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro;
-      var config = {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + this.token
-        }
-      };
-      axios.get(url, config).then(function (response) {
+      axios.get(url).then(function (response) {
         _this.marcas = response.data;
         console.log(_this.marcas);
       })["catch"](function (errors) {
@@ -5259,13 +5248,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
       var confirm = window.confirm('Tem certeza que deseja remover essa marca?');
       if (confirm) {
-        var config = {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + this.token
-          }
-        };
-        axios["delete"](this.urlBase + '/' + this.$store.state.item.id, config).then(function (response) {
+        axios["delete"](this.urlBase + '/' + this.$store.state.item.id).then(function (response) {
           _this2.statusTransacao = 'removido';
           _this2.$store.state.detalhesTransacao = {
             mensagem: 'Marca removida com sucesso.'
@@ -5292,9 +5275,7 @@ __webpack_require__.r(__webpack_exports__);
       }
       var config = {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + this.token
+          'Content-Type': 'multipart/form-data'
         }
       };
       axios.post(this.urlBase + '/' + this.$store.state.item.id, formData, config).then(function (response) {
@@ -5321,9 +5302,7 @@ __webpack_require__.r(__webpack_exports__);
       formData.append('imagem', this.arquivoImagem[0]);
       var config = {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + this.token
+          'Content-Type': 'multipart/form-data'
         }
       };
       axios.post(this.urlBase, formData, config).then(function (response) {
@@ -6072,7 +6051,7 @@ var render = function render() {
           }
         }) : _vm._e()]), _vm._v(" "), _c("input-container-component", {
           attrs: {
-            titulo: "Data de criação"
+            titulo: "Data e hora de criação"
           }
         }, [_c("input", {
           staticClass: "form-control",
@@ -6081,7 +6060,7 @@ var render = function render() {
             disabled: ""
           },
           domProps: {
-            value: _vm.$store.state.item.created_at
+            value: _vm._f("formataDataTempoGlobal")(_vm.$store.state.item.created_at)
           }
         })])];
       },
@@ -6588,6 +6567,33 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     forceTLS: true
 // });
+
+/* Interceptando os requests da aplicação */
+axios.interceptors.request.use(function (config) {
+  var token = localStorage.getItem('token');
+  config.headers.Accept = 'application/json';
+  config.headers.Authorization = 'Bearer ' + token;
+  console.log('Interceptando requisição...', config);
+  return config;
+}, function (error) {
+  console.log('Interceptando erro na requisição...', error);
+  return Promise.reject(error);
+});
+
+/* Interceptando os resposes da aplicação */
+axios.interceptors.response.use(function (response) {
+  console.log('Interceptando resposta...', response);
+  return response;
+}, function (error) {
+  console.log('Interceptando erro na resposta...', error);
+  if (error.response.status === 401 && error.response.data.message === "Token has expired") {
+    axios.post('http://localhost:8000/api/refresh').then(function (response) {
+      localStorage.setItem('token', response.data.token);
+      window.location.reload();
+    });
+  }
+  return Promise.reject(error);
+});
 
 /***/ }),
 

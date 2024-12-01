@@ -70,9 +70,11 @@
         <!-- Início do modal de inclusão de marca -->
         <modal-component id="modalMarca" titulo="Adicionar marca">
             <template v-slot:alertas>
-                <alert-component titulo='Cadastro realizado com sucesso.' :detalhes="$store.state.detalhesTransacao" tipo="success"
+                <alert-component titulo='Cadastro realizado com sucesso.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="success"
                                  v-if="statusTransacao === 'adicionado'"></alert-component>
-                <alert-component titulo='Erro ao tentar cadastrar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
+                <alert-component titulo='Erro ao tentar cadastrar a marca.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="danger"
                                  v-if="statusTransacao === 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
@@ -113,8 +115,9 @@
                     <img class="img-fluid" :src="'/storage/' + $store.state.item.imagem" v-if="$store.state.item.imagem"
                          alt="Imagem da marca">
                 </input-container-component>
-                <input-container-component titulo="Data de criação">
-                    <input type="text" class="form-control" :value="$store.state.item.created_at" disabled>
+                <input-container-component titulo="Data e hora de criação">
+                    <input type="text" class="form-control"
+                           :value="$store.state.item.created_at | formataDataTempoGlobal" disabled>
                 </input-container-component>
             </template>
             <template v-slot:rodape>
@@ -126,9 +129,11 @@
         <!-- Início do modal de remoção de marca -->
         <modal-component id="modalRemocaoMarca" titulo="Remoção da marca">
             <template v-slot:alertas>
-                <alert-component titulo='Transação realizada com sucesso.' :detalhes="$store.state.detalhesTransacao" tipo="success"
+                <alert-component titulo='Transação realizada com sucesso.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="success"
                                  v-if="statusTransacao === 'removido'"></alert-component>
-                <alert-component titulo='Erro ao tentar deletar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
+                <alert-component titulo='Erro ao tentar deletar a marca.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="danger"
                                  v-if="statusTransacao === 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
@@ -152,7 +157,8 @@
                 <alert-component titulo='Atualização realizada com sucesso.' :detalhes="$store.state.detalhesTransacao"
                                  tipo="success"
                                  v-if="statusTransacao === 'atualizado'"></alert-component>
-                <alert-component titulo='Erro ao tentar atualizar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
+                <alert-component titulo='Erro ao tentar atualizar a marca.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="danger"
                                  v-if="statusTransacao === 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
@@ -203,11 +209,6 @@ export default {
             }
         }
     },
-    computed: {
-        token() {
-            return localStorage.getItem('token');
-        }
-    },
     methods: {
         paginacao(link) {
             if (link.url) {
@@ -223,14 +224,7 @@ export default {
         carregarLista() {
             let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro;
 
-            let config = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + this.token
-                }
-            }
-
-            axios.get(url, config).then(response => {
+            axios.get(url).then(response => {
                 this.marcas = response.data;
                 console.log(this.marcas);
             }).catch(errors => {
@@ -260,14 +254,9 @@ export default {
 
         remover() {
             let confirm = window.confirm('Tem certeza que deseja remover essa marca?');
+
             if (confirm) {
-                let config = {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': 'Bearer ' + this.token
-                    }
-                }
-                axios.delete(this.urlBase + '/' + this.$store.state.item.id, config)
+                axios.delete(this.urlBase + '/' + this.$store.state.item.id)
                     .then(response => {
                         this.statusTransacao = 'removido';
                         this.$store.state.detalhesTransacao = {
@@ -298,8 +287,6 @@ export default {
             let config = {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + this.token
                 }
             }
             axios.post(this.urlBase + '/' + this.$store.state.item.id, formData, config)
@@ -329,8 +316,6 @@ export default {
             let config = {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + this.token
                 }
             }
             axios.post(this.urlBase, formData, config)
