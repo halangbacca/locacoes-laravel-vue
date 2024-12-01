@@ -7,11 +7,12 @@ Este projeto é uma aplicação web full-stack desenvolvida no curso de Laravel 
 - Pesquisa de marcas por ID ou nome
 - Exibição dos resultados da pesquisa em formato de tabela
 - Opção de filtrar os resultados por ID ou nome
+- Autenticação por token JWT
 
 ## Requisitos
 - PHP 7.4 ou superior
 - Laravel 8.x ou superior
-- Banco de dados MySQL ou superior
+- Banco de dados MySQL 8 ou superior
 
 ## Instalação
 - Clone o repositório do projeto
