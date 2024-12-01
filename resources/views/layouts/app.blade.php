@@ -103,11 +103,18 @@
 
     @auth
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{Route::currentRouteName()}}</li>
+            <ol class="breadcrumb bg-light p-3 rounded shadow-sm">
+                <li class="breadcrumb-item">
+                    <a href="{{route('home')}}" class="text-primary text-decoration-none">
+                        <i class="bi bi-house-door-fill"></i> Home
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">
+                    {{ ucwords(str_replace('-', ' ', Route::currentRouteName())) }}
+                </li>
             </ol>
         </nav>
+
     @endauth
 
     <main class="py-4">
