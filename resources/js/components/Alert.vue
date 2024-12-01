@@ -3,8 +3,8 @@
         {{ titulo }}
         <hr>
         <p>{{ detalhes.mensagem }}</p>
-        <ul v-if="detalhes.erros">
-            <li v-for="(error, key) in detalhes.errors" :key="key">{{ error[0] }}</li>
+        <ul v-if="detalhes.dados">
+            <li v-for="(error, key) in detalhes.dados" :key="key">{{ error[0] }}</li>
         </ul>
     </div>
 </template>

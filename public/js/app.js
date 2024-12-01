@@ -5197,7 +5197,6 @@ __webpack_require__.r(__webpack_exports__);
       nomeMarca: '',
       arquivoImagem: [],
       statusTransacao: '',
-      detalhesTransacao: {},
       marcas: {
         data: []
       },
@@ -5268,14 +5267,14 @@ __webpack_require__.r(__webpack_exports__);
         };
         axios["delete"](this.urlBase + '/' + this.$store.state.item.id, config).then(function (response) {
           _this2.statusTransacao = 'removido';
-          _this2.detalhesTransacao = {
+          _this2.$store.state.detalhesTransacao = {
             mensagem: 'Marca removida com sucesso.'
           };
           console.log(response);
           _this2.carregarLista();
         })["catch"](function (errors) {
           _this2.statusTransacao = 'erro';
-          _this2.detalhesTransacao = {
+          _this2.$store.state.detalhesTransacao = {
             mensagem: errors.response.data.message,
             erros: errors.response.data.errors
           };
@@ -5283,8 +5282,40 @@ __webpack_require__.r(__webpack_exports__);
         });
       }
     },
-    salvar: function salvar() {
+    atualizar: function atualizar() {
       var _this3 = this;
+      var formData = new FormData();
+      formData.append('_method', 'patch');
+      formData.append('nome', this.$store.state.item.nome);
+      if (this.arquivoImagem[0]) {
+        formData.append('imagem', this.arquivoImagem[0]);
+      }
+      var config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + this.token
+        }
+      };
+      axios.post(this.urlBase + '/' + this.$store.state.item.id, formData, config).then(function (response) {
+        _this3.statusTransacao = 'atualizado';
+        _this3.$store.state.detalhesTransacao = {
+          mensagem: 'Marca atualizada com sucesso.'
+        };
+        console.log(response);
+        atualizarImagem.value = '';
+        _this3.carregarLista();
+      })["catch"](function (errors) {
+        _this3.statusTransacao = 'erro';
+        _this3.$store.state.detalhesTransacao = {
+          mensagem: errors.response.data.message,
+          dados: errors.response.data.errors
+        };
+        console.log(_this3.$store.state.detalhesTransacao.erros);
+      });
+    },
+    salvar: function salvar() {
+      var _this4 = this;
       var formData = new FormData();
       formData.append('nome', this.nomeMarca);
       formData.append('imagem', this.arquivoImagem[0]);
@@ -5296,15 +5327,15 @@ __webpack_require__.r(__webpack_exports__);
         }
       };
       axios.post(this.urlBase, formData, config).then(function (response) {
-        _this3.statusTransacao = 'adicionado';
-        _this3.detalhesTransacao = {
+        _this4.statusTransacao = 'adicionado';
+        _this4.$store.state.detalhesTransacao = {
           mensagem: 'ID do registro: ' + response.data.id
         };
         console.log(response);
-        _this3.carregarLista();
+        _this4.carregarLista();
       })["catch"](function (errors) {
-        _this3.statusTransacao = 'erro';
-        _this3.detalhesTransacao = {
+        _this4.statusTransacao = 'erro';
+        _this4.$store.state.detalhesTransacao = {
           mensagem: errors.response.data.message,
           erros: errors.response.data.errors
         };
@@ -5365,6 +5396,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     setStore: function setStore(obj) {
+      this.$store.state.detalhesTransacao.status = '';
+      this.$store.state.detalhesTransacao.mensagem = '';
+      this.$store.state.detalhesTransacao.dados = '';
       this.$store.state.item = obj;
     }
   }
@@ -5393,7 +5427,7 @@ var render = function render() {
     attrs: {
       role: "alert"
     }
-  }, [_vm._v("\n    " + _vm._s(_vm.titulo) + "\n    "), _c("hr"), _vm._v(" "), _c("p", [_vm._v(_vm._s(_vm.detalhes.mensagem))]), _vm._v(" "), _vm.detalhes.erros ? _c("ul", _vm._l(_vm.detalhes.errors, function (error, key) {
+  }, [_vm._v("\n    " + _vm._s(_vm.titulo) + "\n    "), _c("hr"), _vm._v(" "), _c("p", [_vm._v(_vm._s(_vm.detalhes.mensagem))]), _vm._v(" "), _vm.detalhes.dados ? _c("ul", _vm._l(_vm.detalhes.dados, function (error, key) {
     return _c("li", {
       key: key
     }, [_vm._v(_vm._s(error[0]))]);
@@ -5897,13 +5931,13 @@ var render = function render() {
         return [_vm.statusTransacao === "adicionado" ? _c("alert-component", {
           attrs: {
             titulo: "Cadastro realizado com sucesso.",
-            detalhes: _vm.detalhesTransacao,
+            detalhes: _vm.$store.state.detalhesTransacao,
             tipo: "success"
           }
         }) : _vm._e(), _vm._v(" "), _vm.statusTransacao === "erro" ? _c("alert-component", {
           attrs: {
             titulo: "Erro ao tentar cadastrar a marca.",
-            detalhes: _vm.detalhesTransacao,
+            detalhes: _vm.$store.state.detalhesTransacao,
             tipo: "danger"
           }
         }) : _vm._e()];
@@ -6076,13 +6110,13 @@ var render = function render() {
         return [_vm.statusTransacao === "removido" ? _c("alert-component", {
           attrs: {
             titulo: "Transação realizada com sucesso.",
-            detalhes: _vm.detalhesTransacao,
+            detalhes: _vm.$store.state.detalhesTransacao,
             tipo: "success"
           }
         }) : _vm._e(), _vm._v(" "), _vm.statusTransacao === "erro" ? _c("alert-component", {
           attrs: {
             titulo: "Erro ao tentar deletar a marca.",
-            detalhes: _vm.detalhesTransacao,
+            detalhes: _vm.$store.state.detalhesTransacao,
             tipo: "danger"
           }
         }) : _vm._e()];
@@ -6140,6 +6174,112 @@ var render = function render() {
             }
           }
         }, [_vm._v("Remover")])];
+      },
+      proxy: true
+    }])
+  }), _vm._v(" "), _c("modal-component", {
+    attrs: {
+      id: "modalAtualizacaoMarca",
+      titulo: "Atualizar marca"
+    },
+    scopedSlots: _vm._u([{
+      key: "alertas",
+      fn: function fn() {
+        return [_vm.statusTransacao === "atualizado" ? _c("alert-component", {
+          attrs: {
+            titulo: "Atualização realizada com sucesso.",
+            detalhes: _vm.$store.state.detalhesTransacao,
+            tipo: "success"
+          }
+        }) : _vm._e(), _vm._v(" "), _vm.statusTransacao === "erro" ? _c("alert-component", {
+          attrs: {
+            titulo: "Erro ao tentar atualizar a marca.",
+            detalhes: _vm.$store.state.detalhesTransacao,
+            tipo: "danger"
+          }
+        }) : _vm._e()];
+      },
+      proxy: true
+    }, {
+      key: "conteudo",
+      fn: function fn() {
+        return [_c("div", {
+          staticClass: "form-group"
+        }, [_c("input-container-component", {
+          attrs: {
+            titulo: "Nome",
+            id: "atualizarNome",
+            "id-help": "atualizarNomeHelp",
+            "texto-ajuda": "Informe o nome da marca"
+          }
+        }, [_c("input", {
+          directives: [{
+            name: "model",
+            rawName: "v-model",
+            value: _vm.$store.state.item.nome,
+            expression: "$store.state.item.nome"
+          }],
+          staticClass: "form-control",
+          attrs: {
+            type: "text",
+            id: "atualizarNome",
+            "aria-describedby": "atualizarNomeHelp",
+            placeholder: "Digite o nome da marca"
+          },
+          domProps: {
+            value: _vm.$store.state.item.nome
+          },
+          on: {
+            input: function input($event) {
+              if ($event.target.composing) return;
+              _vm.$set(_vm.$store.state.item, "nome", $event.target.value);
+            }
+          }
+        })])], 1), _vm._v(" "), _c("div", {
+          staticClass: "form-group"
+        }, [_c("input-container-component", {
+          attrs: {
+            titulo: "Imagem",
+            id: "atualizarImagem",
+            "id-help": "atualizarImagemHelp",
+            "texto-ajuda": "Selecione uma imagem no formato PNG"
+          }
+        }, [_c("input", {
+          staticClass: "form-control",
+          attrs: {
+            type: "file",
+            id: "atualizarImagem",
+            "aria-describedby": "atualizarImagemHelp",
+            placeholder: "Selecione uma imagem"
+          },
+          on: {
+            change: function change($event) {
+              return _vm.carregarImagem($event);
+            }
+          }
+        })])], 1)];
+      },
+      proxy: true
+    }, {
+      key: "rodape",
+      fn: function fn() {
+        return [_c("button", {
+          staticClass: "btn btn-secondary",
+          attrs: {
+            type: "button",
+            "data-bs-dismiss": "modal"
+          }
+        }, [_vm._v("Fechar")]), _vm._v(" "), _c("button", {
+          staticClass: "btn btn-primary",
+          attrs: {
+            type: "button"
+          },
+          on: {
+            click: function click($event) {
+              return _vm.atualizar();
+            }
+          }
+        }, [_vm._v("Atualizar")])];
       },
       proxy: true
     }])
@@ -6343,7 +6483,12 @@ window.Vue = (__webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js
 Vue.use(vuex__WEBPACK_IMPORTED_MODULE_0__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_0__["default"].Store({
   state: {
-    item: {}
+    item: {},
+    detalhesTransacao: {
+      status: '',
+      mensagem: '',
+      dados: ''
+    }
   }
 });
 

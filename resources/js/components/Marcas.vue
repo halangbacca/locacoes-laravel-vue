@@ -70,9 +70,9 @@
         <!-- Início do modal de inclusão de marca -->
         <modal-component id="modalMarca" titulo="Adicionar marca">
             <template v-slot:alertas>
-                <alert-component titulo='Cadastro realizado com sucesso.' :detalhes="detalhesTransacao" tipo="success"
+                <alert-component titulo='Cadastro realizado com sucesso.' :detalhes="$store.state.detalhesTransacao" tipo="success"
                                  v-if="statusTransacao === 'adicionado'"></alert-component>
-                <alert-component titulo='Erro ao tentar cadastrar a marca.' :detalhes="detalhesTransacao" tipo="danger"
+                <alert-component titulo='Erro ao tentar cadastrar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
                                  v-if="statusTransacao === 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
@@ -126,9 +126,9 @@
         <!-- Início do modal de remoção de marca -->
         <modal-component id="modalRemocaoMarca" titulo="Remoção da marca">
             <template v-slot:alertas>
-                <alert-component titulo='Transação realizada com sucesso.' :detalhes="detalhesTransacao" tipo="success"
+                <alert-component titulo='Transação realizada com sucesso.' :detalhes="$store.state.detalhesTransacao" tipo="success"
                                  v-if="statusTransacao === 'removido'"></alert-component>
-                <alert-component titulo='Erro ao tentar deletar a marca.' :detalhes="detalhesTransacao" tipo="danger"
+                <alert-component titulo='Erro ao tentar deletar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
                                  v-if="statusTransacao === 'erro'"></alert-component>
             </template>
             <template v-slot:conteudo>
@@ -146,6 +146,41 @@
         </modal-component>
         <!-- Término do modal de remoção de marca -->
 
+        <!-- Início do modal de atualização de marca -->
+        <modal-component id="modalAtualizacaoMarca" titulo="Atualizar marca">
+            <template v-slot:alertas>
+                <alert-component titulo='Atualização realizada com sucesso.' :detalhes="$store.state.detalhesTransacao"
+                                 tipo="success"
+                                 v-if="statusTransacao === 'atualizado'"></alert-component>
+                <alert-component titulo='Erro ao tentar atualizar a marca.' :detalhes="$store.state.detalhesTransacao" tipo="danger"
+                                 v-if="statusTransacao === 'erro'"></alert-component>
+            </template>
+            <template v-slot:conteudo>
+                <div class="form-group">
+                    <input-container-component titulo="Nome" id="atualizarNome" id-help="atualizarNomeHelp"
+                                               texto-ajuda="Informe o nome da marca">
+                        <input type="text" class="form-control" id="atualizarNome" aria-describedby="atualizarNomeHelp"
+                               placeholder="Digite o nome da marca" v-model="$store.state.item.nome">
+                    </input-container-component>
+                </div>
+
+                <div class="form-group">
+                    <input-container-component titulo="Imagem" id="atualizarImagem" id-help="atualizarImagemHelp"
+                                               texto-ajuda="Selecione uma imagem no formato PNG">
+                        <input type="file" class="form-control" id="atualizarImagem"
+                               aria-describedby="atualizarImagemHelp"
+                               placeholder="Selecione uma imagem" @change="carregarImagem($event)">
+                    </input-container-component>
+                </div>
+            </template>
+
+            <template v-slot:rodape>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" @click="atualizar()">Atualizar</button>
+            </template>
+        </modal-component>
+        <!-- Término do modal de atualização de marca -->
+
     </div>
 </template>
 
@@ -159,7 +194,6 @@ export default {
             nomeMarca: '',
             arquivoImagem: [],
             statusTransacao: '',
-            detalhesTransacao: {},
             marcas: {
                 data: []
             },
@@ -236,20 +270,55 @@ export default {
                 axios.delete(this.urlBase + '/' + this.$store.state.item.id, config)
                     .then(response => {
                         this.statusTransacao = 'removido';
-                        this.detalhesTransacao = {
+                        this.$store.state.detalhesTransacao = {
                             mensagem: 'Marca removida com sucesso.'
                         }
                         console.log(response);
                         this.carregarLista();
                     }).catch(errors => {
                     this.statusTransacao = 'erro';
-                    this.detalhesTransacao = {
+                    this.$store.state.detalhesTransacao = {
                         mensagem: errors.response.data.message,
                         erros: errors.response.data.errors
                     };
                     console.log(errors.response)
                 });
             }
+        },
+
+        atualizar() {
+            let formData = new FormData();
+            formData.append('_method', 'patch');
+            formData.append('nome', this.$store.state.item.nome);
+
+            if (this.arquivoImagem[0]) {
+                formData.append('imagem', this.arquivoImagem[0]);
+            }
+
+            let config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + this.token
+                }
+            }
+            axios.post(this.urlBase + '/' + this.$store.state.item.id, formData, config)
+                .then(response => {
+                    this.statusTransacao = 'atualizado';
+                    this.$store.state.detalhesTransacao = {
+                        mensagem: 'Marca atualizada com sucesso.'
+                    }
+                    console.log(response);
+                    atualizarImagem.value = ''
+                    this.carregarLista();
+                }).catch(errors => {
+                this.statusTransacao = 'erro';
+                this.$store.state.detalhesTransacao = {
+                    mensagem: errors.response.data.message,
+                    dados: errors.response.data.errors
+                };
+                console.log(this.$store.state.detalhesTransacao.erros)
+            });
         },
 
         salvar() {
@@ -267,14 +336,14 @@ export default {
             axios.post(this.urlBase, formData, config)
                 .then(response => {
                     this.statusTransacao = 'adicionado';
-                    this.detalhesTransacao = {
+                    this.$store.state.detalhesTransacao = {
                         mensagem: 'ID do registro: ' + response.data.id,
                     }
                     console.log(response);
                     this.carregarLista();
                 }).catch(errors => {
                 this.statusTransacao = 'erro';
-                this.detalhesTransacao = {
+                this.$store.state.detalhesTransacao = {
                     mensagem: errors.response.data.message,
                     erros: errors.response.data.errors
                 };

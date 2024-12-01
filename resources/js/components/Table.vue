@@ -56,6 +56,9 @@ export default {
     },
     methods: {
         setStore(obj) {
+            this.$store.state.detalhesTransacao.status = '';
+            this.$store.state.detalhesTransacao.mensagem = '';
+            this.$store.state.detalhesTransacao.dados = '';
             this.$store.state.item = obj;
         }
     }
