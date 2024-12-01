@@ -32,11 +32,16 @@
                 <!-- Início do card de listagem -->
                 <card-component titulo="Relação de marcas">
                     <template v-slot:conteudo>
-                        <table-component :dados="marcas.data" :titulos="{
-                            id: {titulo: 'ID', tipo: 'text'},
-                            nome: {titulo: 'Nome', tipo: 'text'},
-                            imagem: {titulo: 'Imagem', tipo: 'imagem'},
-                            created_at: {titulo: 'Data de criação', tipo: 'data'},
+                        <table-component
+                            :visualizar="{visivel: true, dataToggle: 'modal', dataTarget: '#modalVisualizacaoMarca'}"
+                            :remover="{visivel: true, dataToggle: 'modal', dataTarget: '#modalRemocaoMarca'}"
+                            :atualizar="{visivel: true, dataToggle: 'modal', dataTarget: '#modalAtualizacaoMarca'}"
+                            :dados="marcas.data"
+                            :titulos="{
+                                id: {titulo: 'ID', tipo: 'text'},
+                                nome: {titulo: 'Nome', tipo: 'text'},
+                                imagem: {titulo: 'Imagem', tipo: 'imagem'},
+                                created_at: {titulo: 'Data de criação', tipo: 'data'},
                             }"></table-component>
                     </template>
                     <template v-slot:rodape>
@@ -61,6 +66,8 @@
                 <!-- Término do card de listagem -->
             </div>
         </div>
+
+        <!-- Início do modal de inclusão de marca -->
         <modal-component id="modalMarca" titulo="Adicionar marca">
             <template v-slot:alertas>
                 <alert-component titulo='Cadastro realizado com sucesso.' :detalhes="detalhesTransacao" tipo="success"
@@ -91,6 +98,54 @@
                 <button type="button" class="btn btn-primary" @click="salvar()">Salvar</button>
             </template>
         </modal-component>
+        <!-- Término do modal de inclusão de marca -->
+
+        <!-- Início do modal de visualização de marca -->
+        <modal-component id="modalVisualizacaoMarca" titulo="Visualização da marca">
+            <template v-slot:conteudo>
+                <input-container-component titulo="ID">
+                    <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+                </input-container-component>
+                <input-container-component titulo="Nome">
+                    <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+                </input-container-component>
+                <input-container-component titulo="Imagem">
+                    <img class="img-fluid" :src="'/storage/' + $store.state.item.imagem" v-if="$store.state.item.imagem"
+                         alt="Imagem da marca">
+                </input-container-component>
+                <input-container-component titulo="Data de criação">
+                    <input type="text" class="form-control" :value="$store.state.item.created_at" disabled>
+                </input-container-component>
+            </template>
+            <template v-slot:rodape>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </template>
+        </modal-component>
+        <!-- Término do modal de visualização de marca -->
+
+        <!-- Início do modal de remoção de marca -->
+        <modal-component id="modalRemocaoMarca" titulo="Remoção da marca">
+            <template v-slot:alertas>
+                <alert-component titulo='Transação realizada com sucesso.' :detalhes="detalhesTransacao" tipo="success"
+                                 v-if="statusTransacao === 'removido'"></alert-component>
+                <alert-component titulo='Erro ao tentar deletar a marca.' :detalhes="detalhesTransacao" tipo="danger"
+                                 v-if="statusTransacao === 'erro'"></alert-component>
+            </template>
+            <template v-slot:conteudo>
+                <input-container-component titulo="ID">
+                    <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+                </input-container-component>
+                <input-container-component titulo="Nome">
+                    <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+                </input-container-component>
+            </template>
+            <template v-slot:rodape>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
+            </template>
+        </modal-component>
+        <!-- Término do modal de remoção de marca -->
+
     </div>
 </template>
 
@@ -169,6 +224,34 @@ export default {
             this.carregarLista();
         },
 
+        remover() {
+            let confirm = window.confirm('Tem certeza que deseja remover essa marca?');
+            if (confirm) {
+                let config = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer ' + this.token
+                    }
+                }
+                axios.delete(this.urlBase + '/' + this.$store.state.item.id, config)
+                    .then(response => {
+                        this.statusTransacao = 'removido';
+                        this.detalhesTransacao = {
+                            mensagem: 'Marca removida com sucesso.'
+                        }
+                        console.log(response);
+                        this.carregarLista();
+                    }).catch(errors => {
+                    this.statusTransacao = 'erro';
+                    this.detalhesTransacao = {
+                        mensagem: errors.response.data.message,
+                        erros: errors.response.data.errors
+                    };
+                    console.log(errors.response)
+                });
+            }
+        },
+
         salvar() {
             let formData = new FormData();
             formData.append('nome', this.nomeMarca);
@@ -188,6 +271,7 @@ export default {
                         mensagem: 'ID do registro: ' + response.data.id,
                     }
                     console.log(response);
+                    this.carregarLista();
                 }).catch(errors => {
                 this.statusTransacao = 'erro';
                 this.detalhesTransacao = {
